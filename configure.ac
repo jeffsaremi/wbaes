@@ -1,7 +1,7 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_PREREQ([2.68])
+AC_PREREQ([2.64])
 AC_INIT([WB_AES],[1.0],[wbaes@hotmail.com])
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([config.h.in])

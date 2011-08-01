@@ -1702,6 +1702,35 @@ fi
 
 } # ac_fn_c_try_link
 
+# ac_fn_c_check_header_preproc LINENO HEADER VAR
+# ----------------------------------------------
+# Tests whether HEADER is present, setting the cache variable VAR accordingly.
+ac_fn_c_check_header_preproc ()
+{
+  as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $2" >&5
+$as_echo_n "checking for $2... " >&6; }
+if eval \${$3+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <$2>
+_ACEOF
+if ac_fn_c_try_cpp "$LINENO"; then :
+  eval "$3=yes"
+else
+  eval "$3=no"
+fi
+rm -f conftest.err conftest.i conftest.$ac_ext
+fi
+eval ac_res=\$$3
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+  eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
+
+} # ac_fn_c_check_header_preproc
+
 # ac_fn_c_find_uintX_t LINENO BITS VAR
 # ------------------------------------
 # Finds an unsigned integer type with width BITS, setting cache variable VAR
@@ -4418,7 +4447,7 @@ if test "$ac_res" != no; then :
 fi
 
 if test "${have_m4ri}" = "yes"; then
-	ac_fn_c_check_header_mongrel "$LINENO" "m4ri/m4ri.h" "ac_cv_header_m4ri_m4ri_h" "$ac_includes_default"
+	ac_fn_c_check_header_preproc "$LINENO" "m4ri/m4ri.h" "ac_cv_header_m4ri_m4ri_h"
 if test "x$ac_cv_header_m4ri_m4ri_h" = xyes; then :
 
 else
