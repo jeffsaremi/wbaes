@@ -1,0 +1,15 @@
+White-box AES
+
+This project is intended for educational purposes. 
+The package is provided as is with no explicit or implicit warranties.
+
+The algorithms this package is based on may be protected by one or more patents.
+It is up to the user of this package to clear all legal hurdles with the potential patent holders.
+
+The concept and implementation of this package are taken from the following papers:
+
+- White-Box Cryptography and an AES Implementation, S. Chow, et al., Cloakware Corporation, Ottawa)
+
+- Generating Large Non-singular Matrices over an Arbitray Field with Blocks of Full Rank, James Xiao, et. al.
+
+- A Recursive Construction Method of S-boxes Satisfying Strict Avalance Criterion, Kwangjo Kim, et. al

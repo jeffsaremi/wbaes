@@ -1,0 +1,22 @@
+Building and running wbaes project requires M4RI, linear algebra package over GF(2). 
+This package can be downloaded from http://m4ri.sagemath.org/.
+After you build and install M4RI, you may still need to provide some parameters to 
+"configure" in wbaes project. That depends on how the installation of M4RI was done. 
+Examples of how you might run "configure" are given below:
+
+wbaes/$ ./configure LDFLAGS=-L/usr/local/lib CPPFLAGS=-I/usr/local/include
+
+This example assumes that M4RI's library and include files are installed in non-default folders.
+
+To build wbaes with debugging information included use option --enable-debug:
+
+wbaes/$ ./configure --enable-debug
+
+After the configuration step, you may start the build:
+
+wbaes/$ make
+
+And to run tests:
+
+wbaes/$ make check
+
