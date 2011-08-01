@@ -32,7 +32,7 @@ AC_CHECK_HEADERS([memory.h stdint.h stdlib.h string.h])
 have_m4ri=no
 AC_SEARCH_LIBS([mzd_init], [m4ri], [have_m4ri=yes])
 if test "${have_m4ri}" = "yes"; then
-	AC_CHECK_HEADER([m4ri/m4ri.h], [], [have_m4ri=no])
+	AC_CHECK_HEADER([m4ri/m4ri.h], [], [have_m4ri=no], [-])
 fi
 if test "${have_m4ri}" = "no"; then
 	AC_MSG_ERROR([M4RI library and include path are needed.	Install M4RI and rerun configure])
