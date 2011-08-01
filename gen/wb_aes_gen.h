@@ -60,7 +60,7 @@ int make_tbox(tbox_t tbox,
  * \param encoding_sbox Non-linear sboxes used to encode the output from this round.
  * The corresponding inverses will be used at the input to the next step (TypeIV)
  */
-int make_typeIATables(typeIA_t typeIA,
+int make_typeIA(typeIA_t typeIA,
 		gf2matrix *first_inv_tbox_mixing_bijection[4][4],
 		gf2matrix *initial_decoding,
 		sboxes_8bit_t decoding_sbox,
@@ -78,7 +78,7 @@ int make_typeIATables(typeIA_t typeIA,
  * \param encoding_sbox Non-linear sboxes used to encode the output from this round.
  * The corresponding inverses will be used at the input to the next step (TypeIV)
  */
-int make_typeIBTables(typeIB_t typeIB,
+int make_typeIB(typeIB_t typeIB,
 		uint8_t last_round_tbox[4][4][256],
 		gf2matrix *final_encoding,
 		sboxes_8bit_t decoding_sbox,
@@ -88,7 +88,7 @@ int make_typeIBTables(typeIB_t typeIB,
  * Type II tables are a combination of TBoxes, original AES Mix _columns,
  * and a mixing bijection on top of them
  */
-int make_typeIITables(typeII_t typeII,
+int make_typeII(typeII_t typeII,
 		tbox_t tbox,
 		gf2matrix *mix_columns_mixing_bijection,
 		sboxes_8bit_t decoding_sbox[NR-1],
@@ -104,7 +104,7 @@ int make_typeIITables(typeII_t typeII,
  * \param encoding_sbox Non-linear sboxes used to encode the output from this round.
  * The correspnding decoding sboxes will be used in the next Type IV step.
  */
-int make_typeIIITables(typeIII_t typeIII,
+int make_typeIII(typeIII_t typeIII,
 		gf2matrix *inv_mix_columns_mixing_bijection,
 		tbox_mixing_bijections_t inv_tbox_mixing_bijections,
 		sboxes_8bit_t decoding_sbox[NR-1],

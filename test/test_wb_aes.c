@@ -219,7 +219,7 @@ void test_typeIA()
 	make_sbox_pair_8(input_sbox, input_sbox_inv);
 	make_sbox_pair_128(output_sbox, output_sbox_inv);
 
-	make_typeIATables(typeIAs, inv_tbox_mixing_bijection, initial_decoding,
+	make_typeIA(typeIAs, inv_tbox_mixing_bijection, initial_decoding,
 			input_sbox_inv, output_sbox);
 
 	for (row = 0; row < 4; ++row) {
@@ -289,7 +289,7 @@ void test_typeIB()
 	make_sbox_pair_8(input_sbox, input_sbox_inv);
 	make_sbox_pair_128(output_sbox, output_sbox_inv);
 
-	make_typeIBTables(typeIBs, tbox[NR - 1], final_encoding, input_sbox_inv,
+	make_typeIB(typeIBs, tbox[NR - 1], final_encoding, input_sbox_inv,
 			output_sbox);
 
 	for (row = 0; row < 4; ++row) {
@@ -461,7 +461,7 @@ void test_typeIA_IV_combined()
 	make_sbox_pair_128(middle_sbox, middle_sbox_inv);
 	make_sbox_pair_8(output_sbox, output_sbox_inv);
 
-	make_typeIATables(typeIAs, inv_tbox_mixing_bijection, initial_decoding,
+	make_typeIA(typeIAs, inv_tbox_mixing_bijection, initial_decoding,
 			input_sbox_inv, middle_sbox);
 	make_typeIV_IA(typeIV_Is, middle_sbox_inv, output_sbox, output_sbox_inv);
 
@@ -542,7 +542,7 @@ void test_typeIB_IV_combined()
 	make_sbox_pair_128(middle_sbox, middle_sbox_inv);
 	make_sbox_pair_8(output_sbox, output_sbox_inv);
 
-	make_typeIBTables(typeIBs, tbox[NR - 1], final_encoding, input_sbox_inv,
+	make_typeIB(typeIBs, tbox[NR - 1], final_encoding, input_sbox_inv,
 			middle_sbox);
 	make_typeIV_IB(typeIV_Is, middle_sbox_inv, output_sbox, output_sbox_inv);
 
@@ -616,7 +616,7 @@ void test_typeII()
 	make_rounds_sbox_pair_8(input_sbox, input_sbox_inv, NR - 1);
 	make_rounds_sbox_pair_32(output_sbox, output_sbox_inv, NR - 1);
 
-	make_typeIITables(typeIIs, tbox, mix_columns_mixing_bijection,
+	make_typeII(typeIIs, tbox, mix_columns_mixing_bijection,
 			input_sbox_inv, output_sbox);
 
 	for (round = 0; round < NR - 1; ++round) {
@@ -689,7 +689,7 @@ void test_typeII_IV_combined()
 	make_rounds_sbox_pair_32(middle_sbox, middle_sbox_inv, NR - 1);
 	make_rounds_sbox_pair_8(output_sbox, output_sbox_inv, NR - 1);
 
-	make_typeIITables(typeIIs, tbox, mix_columns_mixing_bijection,
+	make_typeII(typeIIs, tbox, mix_columns_mixing_bijection,
 			input_sbox_inv, middle_sbox);
 	make_typeIV_II(typeIV_IIs, middle_sbox_inv, output_sbox, output_sbox_inv);
 
@@ -762,7 +762,7 @@ void test_typeIII()
 	make_tbox_mixing_bijections(inv_tbox_mixing_bijections, NULL);
 	make_rounds_sbox_pair_8(input_sbox, input_sbox_inv, NR - 1);
 	make_rounds_sbox_pair_32(output_sbox, output_sbox_inv, NR - 1);
-	make_typeIIITables(typeIIIs, inv_mix_columns_mixing_bijection,
+	make_typeIII(typeIIIs, inv_mix_columns_mixing_bijection,
 			inv_tbox_mixing_bijections, input_sbox_inv, output_sbox);
 
 	for (round = 0; round < NR - 1; ++round) {
@@ -832,7 +832,7 @@ void test_typeIII_IV_combined()
 	make_rounds_sbox_pair_32(middle_sbox, middle_sbox_inv, NR - 1);
 	make_rounds_sbox_pair_8(output_sbox, output_sbox_inv, NR - 1);
 
-	make_typeIIITables(typeIIIs, inv_mix_columns_mixing_bijection,
+	make_typeIII(typeIIIs, inv_mix_columns_mixing_bijection,
 			inv_tbox_mixing_bijections, input_sbox_inv, middle_sbox);
 	make_typeIV_III(typeIV_IIIs, middle_sbox_inv, output_sbox, output_sbox_inv);
 
@@ -928,12 +928,12 @@ void test_typeIA_II_combined()
 			- 1);
 	make_rounds_sbox_pair_8(typeII_output_sbox, typeII_output_sbox_inv, NR - 1);
 
-	make_typeIATables(typeIAs, inv_tbox_mixing_bijections[0], initial_decoding,
+	make_typeIA(typeIAs, inv_tbox_mixing_bijections[0], initial_decoding,
 			typeIA_input_sbox_inv, typeIA_interim_sbox);
 	make_typeIV_IA(typeIV_Is, typeIA_interim_sbox_inv, typeII_input_sbox[0],
 			typeII_input_sbox_inv[0]);
 
-	make_typeIITables(typeIIs, tbox, mix_columns_mixing_bijection,
+	make_typeII(typeIIs, tbox, mix_columns_mixing_bijection,
 			typeII_input_sbox_inv, typeII_interim_sbox);
 	make_typeIV_II(typeIV_IIs, typeII_interim_sbox_inv, typeII_output_sbox,
 			typeII_output_sbox_inv);
@@ -1053,12 +1053,12 @@ void test_typeIII_IB_combined()
 	make_sbox_pair_128(typeIB_middle_sbox, typeIB_middle_sbox_inv);
 	make_sbox_pair_8(typeIB_output_sbox, typeIB_output_sbox_inv);
 
-	make_typeIIITables(typeIIIs, inv_mix_columns_mixing_bijection,
+	make_typeIII(typeIIIs, inv_mix_columns_mixing_bijection,
 			inv_tbox_mixing_bijections, typeIII_input_sbox_inv,
 			typeIII_middle_sbox);
 	make_typeIV_III(typeIV_IIIs, typeIII_middle_sbox_inv, typeIII_output_sbox,
 			typeIII_output_sbox_inv);
-	make_typeIBTables(typeIBs, tbox[NR - 1], final_encoding,
+	make_typeIB(typeIBs, tbox[NR - 1], final_encoding,
 			typeIII_output_sbox_inv[NR - 2], typeIB_middle_sbox);
 	make_typeIV_IB(typeIV_IBs, typeIB_middle_sbox_inv, typeIB_output_sbox,
 			typeIB_output_sbox_inv);
@@ -1199,20 +1199,20 @@ void test_encryption()
 		make_sbox_pair_128(typeIB_interim_sbox, typeIB_interim_sbox_inv);
 		make_sbox_pair_8(typeIB_output_sbox, typeIB_output_sbox_inv);
 
-		make_typeIATables(typeIAs, inv_tbox_mixing_bijections[0], initial_decoding,
+		make_typeIA(typeIAs, inv_tbox_mixing_bijections[0], initial_decoding,
 				typeIA_input_sbox_inv, typeIA_interim_sbox);
 		make_typeIV_IA(typeIV_IAs, typeIA_interim_sbox_inv, typeII_input_sbox[0],
 				typeII_input_sbox_inv[0]);
-		make_typeIITables(typeIIs, tbox, mix_columns_mixing_bijection,
+		make_typeII(typeIIs, tbox, mix_columns_mixing_bijection,
 				typeII_input_sbox_inv, typeII_interim_sbox);
 		make_typeIV_II(typeIV_IIs, typeII_interim_sbox_inv, typeII_output_sbox,
 				typeII_output_sbox_inv);
-		make_typeIIITables(typeIIIs, inv_mix_columns_mixing_bijection,
+		make_typeIII(typeIIIs, inv_mix_columns_mixing_bijection,
 				inv_tbox_mixing_bijections, typeII_output_sbox_inv,
 				typeIII_interim_sbox);
 		make_typeIV_III(typeIV_IIIs, typeIII_interim_sbox_inv,
 				&typeII_input_sbox[1], &typeII_input_sbox_inv[1]);
-		make_typeIBTables(typeIBs, tbox[NR - 1], final_encoding,
+		make_typeIB(typeIBs, tbox[NR - 1], final_encoding,
 				typeII_input_sbox_inv[NR - 1], typeIB_interim_sbox);
 		make_typeIV_IB(typeIV_IBs, typeIB_interim_sbox_inv, typeIB_output_sbox,
 				typeIB_output_sbox_inv);

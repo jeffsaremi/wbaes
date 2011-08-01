@@ -16,6 +16,10 @@ After the configuration step, you may start the build:
 
 wbaes/$ make
 
+Again, depending on your setup you may have to provide the library path for M4RI, such as:
+
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib
+
 And to run tests:
 
 wbaes/$ make check

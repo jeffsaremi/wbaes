@@ -75,7 +75,7 @@ int make_tbox(tbox_t tbox,
 	}
 	return rc;
 }
-int make_typeIITables(typeII_t typeII,
+int make_typeII(typeII_t typeII,
 		tbox_t tbox,
 		gf2matrix *mix_columns_mixing_bijection,
 		sboxes_8bit_t decoding_sbox[NR-1],
@@ -218,7 +218,7 @@ int make_typeIV_IB(typeIV128_t typeIV_IB,
 	return make_typeIV128(typeIV_IB, decoding_sbox,
 			encoding_sbox, encoding_sbox_inv);
 }
-int make_typeIATables(typeIA_t typeIA,
+int make_typeIA(typeIA_t typeIA,
 		gf2matrix *first_inv_tbox_mixing_bijection[4][4],
 		gf2matrix *initial_decoding,
 		sboxes_8bit_t decoding_sbox,
@@ -257,7 +257,7 @@ int make_typeIATables(typeIA_t typeIA,
 	free_matrices(decoding_slices, 4*4);
 	return rc;
 }
-int make_typeIBTables(typeIB_t typeIB,
+int make_typeIB(typeIB_t typeIB,
 		uint8_t last_round_tbox[4][4][256],
 		gf2matrix *final_encoding,
 		sboxes_8bit_t decoding_sbox,
@@ -295,7 +295,7 @@ int make_typeIBTables(typeIB_t typeIB,
 	free_matrices(encoding_slices, 4*4);
 	return rc;
 }
-int make_typeIIITables(typeIII_t typeIII,
+int make_typeIII(typeIII_t typeIII,
 		gf2matrix *inv_mix_columns_mixing_bijection,
 		tbox_mixing_bijections_t inv_tbox_mixing_bijections,
 		sboxes_8bit_t decoding_sbox[NR-1],
