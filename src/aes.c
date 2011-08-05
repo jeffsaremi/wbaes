@@ -172,7 +172,7 @@ void shift_rows(uint8_t state[4][4])
     rotate_word((uint8_t*)&state[2][0], 2);
     rotate_word((uint8_t*)&state[3][0], 3);
 }
-void shift_rows_inv(uint8_t state[4][4])
+void inv_shift_rows(uint8_t state[4][4])
 {
     rotate_word((uint8_t*)&state[1][0], 3);
     rotate_word((uint8_t*)&state[2][0], 2);
@@ -190,7 +190,7 @@ void sub_bytes(uint8_t state[4][4], const uint8_t sbox[256])
     for(i = 0; i < 4; ++i)
         sub_word((uint8_t*)&state[i][0], sbox);
 }
-void sub_bytes_inv(uint8_t state[4][4], const uint8_t isbox[256])
+void inv_sub_bytes(uint8_t state[4][4], const uint8_t isbox[256])
 {
 	int i;
     for(i = 0; i < 4; ++i)
@@ -245,17 +245,25 @@ void expand_key(uint8_t key[KEY_SIZE], const uint8_t sbox[256],
     }
     /* printf("\n"); */
 }
-void mix_expanded_key(uint32_t expanded_key[4*(NR+1)],
-		uint32_t mixed_key_schedule[4*(NR+1)])
+/* void mix_expanded_key(uint32_t expanded_key[4*(NR+1)], */
+/* 		uint32_t mixed_key_schedule[4*(NR+1)]) */
+/* { */
+/* 	int i, round; */
+/*     for(i = 0; i < ((NR+1)*4); ++i) */
+/*     { */
+/*         mixed_key_schedule[i] = expanded_key[i]; */
+/*     } */
+/*     for(round = 1; round < NR; ++round) */
+/*     { */
+/*         mix_columns_inv2((uint8_t*)&mixed_key_schedule[round*4]); */
+/*     } */
+/* } */
+void mix_expanded_key(uint32_t expanded_key[4*(NR+1)])
 {
-	int i, round;
-    for(i = 0; i < ((NR+1)*4); ++i)
-    {
-        mixed_key_schedule[i] = expanded_key[i];
-    }
+	int round;
     for(round = 1; round < NR; ++round)
     {
-        mix_columns_inv2((uint8_t*)&mixed_key_schedule[round*4]);
+        mix_columns_inv2((uint8_t*)&expanded_key[round*4]);
     }
 }
 uint8_t xtime(uint8_t i)
@@ -349,40 +357,40 @@ void decipher(uint8_t in[4*4], uint8_t out[4*4], const uint8_t isbox[256],
         ModMulD[i] = i8 ^ i4 ^ i1;
         ModMulE[i] = i8 ^ i4 ^ i2;
     }
-    dump_hex2("ModMul9: ", ModMul9, 256);
-    dump_hex2("ModMulB: ", ModMulB, 256);
-    dump_hex2("ModMulD: ", ModMulD, 256);
-    dump_hex2("ModMulE: ", ModMulE, 256);
+/*     dump_hex2("ModMul9: ", ModMul9, 256); */
+/*     dump_hex2("ModMulB: ", ModMulB, 256); */
+/*     dump_hex2("ModMulD: ", ModMulD, 256); */
+/*     dump_hex2("ModMulE: ", ModMulE, 256); */
 
     /* dump_hex("Input: ", in, 4*4); */
     input2state(state, in);
 
     printf("round[10]: \n");
     dump_state("\t\tistart ", state);
-    dump_hex("\t\tik_sch ",(uint8_t*)&key_schedule[10*4], 4*4);
+/*     dump_hex("\t\tik_sch ",(uint8_t*)&key_schedule[10*4], 4*4); */
     add_round_key(state, key_schedule, 10);
 
     for(round = NR - 1; round >= 1; --round)
     {
         printf("round[%d]: \n", round);
         dump_state("\t\tistart ", state);
-        shift_rows_inv(state);
-        dump_state("\t\tis_row ", state);
-        sub_bytes_inv(state, isbox);
-        dump_state("\t\tis_box ", state);
-        dump_hex("\t\tik_sch ",(uint8_t*)&key_schedule[(round*4)], 4*4);
+        inv_shift_rows(state);
+/*         dump_state("\t\tis_row ", state); */
+        inv_sub_bytes(state, isbox);
+/*         dump_state("\t\tis_box ", state); */
+/*         dump_hex("\t\tik_sch ",(uint8_t*)&key_schedule[(round*4)], 4*4); */
         add_round_key(state, key_schedule, round);
-        dump_state("\t\tik_add ", state);
+/*         dump_state("\t\tik_add ", state); */
         mix_columns_inv(state);
         /* dump_state("\t\tim_col ", state); */
     }
     printf("round[0]: \n");
     dump_state("\t\tistart ", state);
-    shift_rows_inv(state);
-    dump_state("\t\tis_row ", state);
-    sub_bytes_inv(state, isbox);
-    dump_state("\t\tis_box ", state);
-    dump_hex("\t\tik_sch ",(uint8_t*)&key_schedule[0], 4*4);
+    inv_shift_rows(state);
+/*     dump_state("\t\tis_row ", state); */
+    inv_sub_bytes(state, isbox);
+/*     dump_state("\t\tis_box ", state); */
+/*     dump_hex("\t\tik_sch ",(uint8_t*)&key_schedule[0], 4*4); */
     add_round_key(state, key_schedule, 0);
 
     dump_state("state after last round: ", state);
@@ -408,39 +416,39 @@ void eqv_decipher(uint8_t in[4*4], uint8_t out[4*4], const uint8_t isbox[256],
         ModMulD[i] = i8 ^ i4 ^ i1;
         ModMulE[i] = i8 ^ i4 ^ i2;
     }
-    dump_hex2("ModMul9: ", ModMul9, 256);
-    dump_hex2("ModMulB: ", ModMulB, 256);
-    dump_hex2("ModMulD: ", ModMulD, 256);
-    dump_hex2("ModMulE: ", ModMulE, 256);
+/*     dump_hex2("ModMul9: ", ModMul9, 256); */
+/*     dump_hex2("ModMulB: ", ModMulB, 256); */
+/*     dump_hex2("ModMulD: ", ModMulD, 256); */
+/*     dump_hex2("ModMulE: ", ModMulE, 256); */
 
     /* dump_hex("Input: ", in, 4*4); */
     input2state(state, in);
 
     printf("round[10]: \n");
     dump_state("\t\teistart ", state);
-    dump_hex("\t\teik_sch ",(uint8_t*)&key_schedule[10*4], 4*4);
+/*     dump_hex("\t\teik_sch ",(uint8_t*)&key_schedule[10*4], 4*4); */
     add_round_key(state, key_schedule, 10);
 
     for(round = NR - 1; round >= 1; --round)
     {
         printf("round[%d]: \n", round);
         dump_state("\t\teistart ", state);
-        sub_bytes_inv(state, isbox);
-        dump_state("\t\teis_box ", state);
-        shift_rows_inv(state);
-        dump_state("\t\teis_row ", state);
+        inv_sub_bytes(state, isbox);
+/*         dump_state("\t\teis_box ", state); */
+        inv_shift_rows(state);
+/*         dump_state("\t\teis_row ", state); */
         mix_columns_inv(state);
-        dump_state("\t\teim_col ", state);
-        dump_hex("\t\teik_sch ",(uint8_t*)&key_schedule[(round*4)], 4*4);
+/*         dump_state("\t\teim_col ", state); */
+/*         dump_hex("\t\teik_sch ",(uint8_t*)&key_schedule[(round*4)], 4*4); */
         add_round_key(state, key_schedule, round);
     }
     printf("round[0]: \n");
     dump_state("\t\teistart ", state);
-    sub_bytes_inv(state, isbox);
-    dump_state("\t\teis_box ", state);
-    shift_rows_inv(state);
-    dump_state("\t\teis_row ", state);
-    dump_hex("\t\tik_sch ",(uint8_t*)&key_schedule[0], 4*4);
+    inv_sub_bytes(state, isbox);
+/*     dump_state("\t\teis_box ", state); */
+    inv_shift_rows(state);
+/*     dump_state("\t\teis_row ", state); */
+/*     dump_hex("\t\tik_sch ",(uint8_t*)&key_schedule[0], 4*4); */
     add_round_key(state, key_schedule, 0);
 
     dump_state("state after last round: ", state);

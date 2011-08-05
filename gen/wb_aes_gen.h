@@ -49,6 +49,14 @@ int make_tbox(tbox_t tbox,
 		tbox_mixing_bijections_t tbox_mixing_bijection);
 /**
  * \brief
+ * Same as make_tbox but for decryption
+ */
+int make_inv_tbox(tbox_t tbox,
+		uint8_t sbox[256],
+		uint32_t expanded_key[(NR+1)*4],
+		tbox_mixing_bijections_t tbox_mixing_bijection);
+/**
+ * \brief
  * Makes Type IA lookup tables corresponding to each byte in the state
  * \param typeIA	The Type IA lookup table
  * \param first_inv_tbox_mixing_bijection The inverse of the first TBox Mixing Bijection
@@ -85,10 +93,28 @@ int make_typeIB(typeIB_t typeIB,
 		sboxes_128bit_t encoding_sbox);
 /**
  * \brief
+ * Same as make_typeIB but for decryption
+ */
+int make_inv_typeIB(typeIB_t typeIB,
+		uint8_t last_round_tbox[4][4][256],
+		gf2matrix *final_encoding,
+		sboxes_8bit_t decoding_sbox,
+		sboxes_128bit_t encoding_sbox);
+/**
+ * \brief
  * Type II tables are a combination of TBoxes, original AES Mix _columns,
  * and a mixing bijection on top of them
  */
 int make_typeII(typeII_t typeII,
+		tbox_t tbox,
+		gf2matrix *mix_columns_mixing_bijection,
+		sboxes_8bit_t decoding_sbox[NR-1],
+		sboxes_32bit_t encoding_sbox[NR-1]);
+/**
+ * \brief
+ * Same as make_typeII but for decryption
+ */
+int make_inv_typeII(typeII_t typeII,
 		tbox_t tbox,
 		gf2matrix *mix_columns_mixing_bijection,
 		sboxes_8bit_t decoding_sbox[NR-1],
@@ -109,7 +135,6 @@ int make_typeIII(typeIII_t typeIII,
 		tbox_mixing_bijections_t inv_tbox_mixing_bijections,
 		sboxes_8bit_t decoding_sbox[NR-1],
 		sboxes_32bit_t encoding_sbox[NR-1]);
-
 /**
  * \brief
  * A (2^8)x4 bit lookup or a 256x4bits is coded like a 128 byte array.

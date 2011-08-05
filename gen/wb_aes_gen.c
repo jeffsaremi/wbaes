@@ -6,11 +6,32 @@
 #include "aes.h"
 #include "util.h"
 
+typedef int (*shift_col_f)(int, int);
+typedef void (*mix_slices_f)(uint8_t *, uint8_t, int);
+
+static const int DIRECTION_FORWARD = 0;
+static const int DIRECTION_INVERSE = 1;
+
 static uint8_t g_shifted_cols[4][4] = {
 		{ 0, 1, 2, 3 },
 		{ 1, 2, 3, 0 },
 		{ 2, 3, 0, 1 },
 		{ 3, 0, 1, 2 } };
+static uint8_t g_inv_shifted_cols[4][4] = {
+		{ 0, 1, 2, 3 },
+		{ 3, 0, 1, 2 },
+		{ 2, 3, 0, 1 },
+		{ 1, 2, 3, 0 } };
+
+int get_shifted_col(int row, int col)
+{
+	return g_shifted_cols[row][col];
+}
+int get_inv_shifted_col(int row, int col)
+{
+	return g_inv_shifted_cols[row][col];
+}
+
 void sub_bytes_hi_lo32(uint8_t v[4], uint8_t sbox[][16])
 {
 	int i;
@@ -39,12 +60,12 @@ int make_tbox(tbox_t tbox,
 		for (row = 0; row < 4; ++row) {
 			for (col = 0; col < 4; ++col) {
 				uint8_t shifted_index = (uint8_t) (row + 4
-						* g_shifted_cols[row][col]);
+						* get_shifted_col(row, col));
 				for (x = 0; x < 256; ++x) {
 					uint8_t xpresub;
 					mul_byte_by_matrix(
 							&xpresub,
-							tbox_mixing_bijection[round][row][g_shifted_cols[row][col]],
+							tbox_mixing_bijection[round][row][get_shifted_col(row, col)],
 							x);
 					tbox[round][row][col][x] = sbox[(xpresub
 							^ key[shifted_index])];
@@ -59,13 +80,61 @@ int make_tbox(tbox_t tbox,
 		for (row = 0; row < 4; ++row) {
 			for (col = 0; col < 4; ++col) {
 				uint8_t shifted_index = (uint8_t) (row + 4
-						* g_shifted_cols[row][col]);
+						* get_shifted_col(row, col));
 				uint8_t lastKey_index = (uint8_t) (row + (col * 4));
 				for (x = 0; x < 256; ++x) {
 					uint8_t xpresub;
 					mul_byte_by_matrix(
 							&xpresub,
-							tbox_mixing_bijection[round][row][g_shifted_cols[row][col]],
+							tbox_mixing_bijection[round][row][get_shifted_col(row, col)],
+							x);
+					tbox[round][row][col][x] = sbox[(xpresub
+							^ key[shifted_index])] ^ lastKey[lastKey_index];
+				}
+			}
+		}
+	}
+	return rc;
+}
+int make_inv_tbox(tbox_t tbox,
+		uint8_t sbox[256],
+		uint32_t expanded_key[(NR+1)*4],
+		tbox_mixing_bijections_t tbox_mixing_bijection)
+{
+	int round, col, row, x, k;
+	int rc = 0;
+	for (round = NR - 1; round != 0; --round) {
+		uint8_t *key = (uint8_t *) &expanded_key[(round + 1) * 4];
+		for (row = 0; row < 4; ++row) {
+			for (col = 0; col < 4; ++col) {
+				uint8_t shifted_index = (uint8_t) (row + 4
+						* get_inv_shifted_col(row, col));
+				for (x = 0; x < 256; ++x) {
+					uint8_t xpresub;
+					mul_byte_by_matrix(
+							&xpresub,
+							tbox_mixing_bijection[round][row][get_inv_shifted_col(row, col)],
+							x);
+					tbox[round][row][col][x] = sbox[(xpresub
+							^ key[shifted_index])];
+				}
+			}
+		}
+	}
+	{ /*  The last two rounds are merged into one */
+		round = 0;
+		uint8_t *key = (uint8_t *) &expanded_key[(round + 1) * 4];
+		uint8_t *lastKey = (uint8_t *) &expanded_key[0];
+		for (row = 0; row < 4; ++row) {
+			for (col = 0; col < 4; ++col) {
+				uint8_t shifted_index = (uint8_t) (row + 4
+						* get_inv_shifted_col(row, col));
+				uint8_t lastKey_index = (uint8_t) (row + (col * 4));
+				for (x = 0; x < 256; ++x) {
+					uint8_t xpresub;
+					mul_byte_by_matrix(
+							&xpresub,
+							tbox_mixing_bijection[round][row][get_inv_shifted_col(row, col)],
 							x);
 					tbox[round][row][col][x] = sbox[(xpresub
 							^ key[shifted_index])] ^ lastKey[lastKey_index];
@@ -91,7 +160,7 @@ int make_typeII(typeII_t typeII,
 				for (x = 0; x < 256; ++x) {
 					uint8_t slice[4] = {0,0,0,0};
 					uint8_t xmapped = sub_bytes_hi_lo( x,
-							(decoding_sbox[round])[row][g_shifted_cols[row][col]]);
+							(decoding_sbox[round])[row][get_shifted_col(row, col)]);
 					calc_mixing_slices(slice, tbox[round][row][col][xmapped], row);
 					rc = mul_array_by_matrix_32x32(slice,
 							mix_columns_mixing_bijection, slice);
@@ -114,7 +183,45 @@ int make_typeII(typeII_t typeII,
 end:
 	return rc;
 }
-
+int make_inv_typeII(typeII_t typeII,
+		tbox_t tbox,
+		gf2matrix *mix_columns_mixing_bijection,
+		sboxes_8bit_t decoding_sbox[NR-1],
+		sboxes_32bit_t encoding_sbox[NR-1])
+{
+	int round, col, row, x, k;
+	int rc = 0;
+	/*  there's a ShiftRows step before TypeII step */
+	/*  hence the decoding sboxes need to be adjusted */
+	for (round = NR - 2; round != -1; --round) {
+		for (col = 0; col < 4; ++col) {
+			for (row = 0; row < 4; ++row) {
+				for (x = 0; x < 256; ++x) {
+					uint8_t slice[4] = {0,0,0,0};
+					uint8_t xmapped = sub_bytes_hi_lo( x,
+							(decoding_sbox[round])[row][get_inv_shifted_col(row, col)]);
+					calc_inv_mixing_slices(slice, tbox[round + 1][row][col][xmapped], row);
+					rc = mul_array_by_matrix_32x32(slice,
+							mix_columns_mixing_bijection, slice);
+					assert(rc == 0);
+					if(rc != 0)
+						goto end;
+					for (k = 0; k < 4; ++k) {
+						/*  care must be taken to use the proper encoding sbox */
+						/*  for results; Note that items from one slice are */
+						/*  not being XOR'd but rather corresponding items */
+						/*  from slices generated for one column */
+						slice[k] = sub_bytes_hi_lo( slice[k],
+							(uint8_t (*)[16])&(encoding_sbox[round])[k][col][2 * row]);
+					}
+					memcpy(typeII[round][row][col][x], slice, 4);
+				}
+			}
+		}
+	}
+end:
+	return rc;
+}
 int make_rounds_typeIV(typeIV32_t typeIV32,
 		sboxes_32bit_t decoding_sbox[NR - 1],
 		sboxes_8bit_t encoding_sbox[NR - 1],
@@ -257,7 +364,8 @@ int make_typeIA(typeIA_t typeIA,
 	free_matrices(decoding_slices, 4*4);
 	return rc;
 }
-int make_typeIB(typeIB_t typeIB,
+int make_typeIB_ex(typeIB_t typeIB,
+		int direction,
 		uint8_t last_round_tbox[4][4][256],
 		gf2matrix *final_encoding,
 		sboxes_8bit_t decoding_sbox,
@@ -267,6 +375,9 @@ int make_typeIB(typeIB_t typeIB,
 	/*  decoding of the inputs should take that into account */
 	int col, row, x, k;
 	int rc = 0;
+	shift_col_f shift_col = (direction == 0)
+			? get_shifted_col
+			: get_inv_shifted_col;
 	gf2matrix *encoding_slices[4 * 4];
 	slice_matrix_vertically(encoding_slices, 4 * 4, final_encoding);
 	for (row = 0; row < 4; ++row) {
@@ -274,7 +385,7 @@ int make_typeIB(typeIB_t typeIB,
 			int index = row * 4 + col;
 			for (x = 0; x < 256; ++x) {
 				uint8_t xmapped = sub_bytes_hi_lo(x,
-						decoding_sbox[row][g_shifted_cols[row][col]]);
+						decoding_sbox[row][shift_col(row, col)]);
 				uint8_t slice[16];
 				xmapped = last_round_tbox[row][col][xmapped];
 				mul_byte_by_matrix_128x8(slice, encoding_slices[index],
@@ -294,6 +405,24 @@ int make_typeIB(typeIB_t typeIB,
 	}
 	free_matrices(encoding_slices, 4*4);
 	return rc;
+}
+int make_typeIB(typeIB_t typeIB,
+		uint8_t last_round_tbox[4][4][256],
+		gf2matrix *final_encoding,
+		sboxes_8bit_t decoding_sbox,
+		sboxes_128bit_t encoding_sbox)
+{
+	return make_typeIB_ex(typeIB, DIRECTION_FORWARD, last_round_tbox,
+			final_encoding, decoding_sbox, encoding_sbox);
+}
+int make_inv_typeIB(typeIB_t typeIB,
+		uint8_t last_round_tbox[4][4][256],
+		gf2matrix *final_encoding,
+		sboxes_8bit_t decoding_sbox,
+		sboxes_128bit_t encoding_sbox)
+{
+	return make_typeIB_ex(typeIB, DIRECTION_INVERSE, last_round_tbox,
+			final_encoding, decoding_sbox, encoding_sbox);
 }
 int make_typeIII(typeIII_t typeIII,
 		gf2matrix *inv_mix_columns_mixing_bijection,
@@ -319,7 +448,7 @@ int make_typeIII(typeIII_t typeIII,
 						goto end;
 					for (k = 0; k < 4; ++k) {
 						rc = mul_byte_by_matrix(&mc[k],
-								inv_tbox_mixing_bijections[round + 1][k][col],
+								inv_tbox_mixing_bijections[round][k][col],
 								mc[k]);
 					}
 					for (k = 0; k < 4; ++k) {

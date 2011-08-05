@@ -38,13 +38,13 @@ void rotate_word(uint8_t w[4], int i);
 /** verbatim from AES standard */
 void shift_rows(uint8_t state[4][4]);
 /** verbatim from AES standard */
-void shift_rows_inv(uint8_t state[4][4]);
+void inv_shift_rows(uint8_t state[4][4]);
 /** verbatim from AES standard */
 void sub_word(uint8_t w[4], const uint8_t sbox[256]);
 /** verbatim from AES standard */
 void sub_bytes(uint8_t state[4][4], const uint8_t sbox[256]);
 /** verbatim from AES standard */
-void sub_bytes_inv(uint8_t state[4][4], const uint8_t isbox[256]);
+void inv_sub_bytes(uint8_t state[4][4], const uint8_t isbox[256]);
 /** verbatim from AES standard */
 uint8_t xtime(uint8_t i);
 /** Utility to copy 16 bytes of input to the state matrix */
@@ -55,8 +55,7 @@ void state2output(uint8_t output[16], uint8_t state[4][4]);
 void expand_key(uint8_t key[KEY_SIZE], const uint8_t sbox[256],
 		uint32_t key_schedule[4*(NR+1)], int nk);
 /** verbatim from AES standard */
-void mix_expanded_key(uint32_t expanded_key[4*(NR+1)],
-		uint32_t mixed_key_schedule[4*(NR+1)]);
+void mix_expanded_key(uint32_t expanded_key[4*(NR+1)]);
 /** cipher implementation as per AES standard */
 void cipher(uint8_t in[4*4], uint8_t out[4*4], const uint8_t sbox[256],
 		uint32_t key_schedule[4*(NR+1)]);

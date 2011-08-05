@@ -234,7 +234,8 @@ void test_typeIA()
 	/*  additionally decode the output and present the state */
 	for (row = 0; row < 4; ++row) {
 		for (col = 0; col < 4; ++col) {
-			sub_bytes_hi_lo128(strips[row][col], output_sbox_inv[row][col]);
+			sub_bytes_hi_lo128(strips[row][col],
+					output_sbox_inv[row][col]);
 		}
 	}
 	dump_4bit_strip128("output: ", strips);
@@ -242,8 +243,9 @@ void test_typeIA()
 	slice_matrix_vertically(decoding_slices, 4 * 4, initial_decoding);
 	for (row = 0; row < 4; ++row) {
 		for (col = 0; col < 4; ++col) {
-			mul_byte_by_matrix_128x8(strips_temp[row][col], decoding_slices[row * 4
-					+ col], pre_enc_state[row][col]);
+			mul_byte_by_matrix_128x8(strips_temp[row][col],
+					decoding_slices[row * 4 + col],
+					pre_enc_state[row][col]);
 			for (k = 0; k < 16; ++k) {
 				mul_byte_by_matrix(&strips_temp[row][col][k],
 						inv_tbox_mixing_bijection[k/4][k%4],
@@ -573,7 +575,8 @@ void test_typeIB_IV_combined()
 		for (col = 0; col < 4; ++col) {
 			int index = row * 4 + col;
 			uint8_t tbox_val = tbox[NR - 1][row][col][pre_enc_state[row][col]];
-			mul_byte_by_matrix_128x8(strips[row][col], encoding_slices[index],
+			mul_byte_by_matrix_128x8(strips[row][col],
+					encoding_slices[index],
 					tbox_val);
 		}
 	}
@@ -648,7 +651,8 @@ void test_typeII()
 				int new_row;
 				uint8_t temp = tbox[round][row][col][pre_enc_state[row][col]];
 				calc_mixing_slices(slice, temp, row);
-				mul_array_by_matrix_32x32(slice, mix_columns_mixing_bijection,
+				mul_array_by_matrix_32x32(slice,
+						mix_columns_mixing_bijection,
 						slice);
 				for (new_row = 0; new_row < 4; ++new_row) {
 					strips2[new_row][col][row] = slice[new_row];
@@ -724,7 +728,8 @@ void test_typeII_IV_combined()
 				uint8_t temp = tbox[round][row][col][pre_enc_state[row][col]];
 				uint8_t slice[4];
 				calc_mixing_slices(slice, temp, row);
-				mul_array_by_matrix_32x32(slice, mix_columns_mixing_bijection,
+				mul_array_by_matrix_32x32(slice,
+						mix_columns_mixing_bijection,
 						slice);
 				for (k = 0; k < 4; ++k) {
 					strips2[k][col][row] = slice[k];
@@ -791,11 +796,13 @@ void test_typeIII()
 				int new_row;
 				uint8_t mc[4] = { 0, 0, 0, 0 };
 				mc[row] = pre_enc_state[row][col];
-				mul_array_by_matrix_32x32(mc, inv_mix_columns_mixing_bijection,
+				mul_array_by_matrix_32x32(mc,
+						inv_mix_columns_mixing_bijection,
 						mc);
 				for (k = 0; k < 4; ++k) {
-					mul_byte_by_matrix(&mc[k], inv_tbox_mixing_bijections[round
-							+ 1][k][col], mc[k]);
+					mul_byte_by_matrix(&mc[k],
+							inv_tbox_mixing_bijections[round][k][col],
+							mc[k]);
 				}
 				for (new_row = 0; new_row < 4; ++new_row) {
 					strips2[new_row][col][row] = mc[new_row];
@@ -865,11 +872,13 @@ void test_typeIII_IV_combined()
 				int new_row;
 				uint8_t mc[4] = { 0, 0, 0, 0 };
 				mc[row] = pre_enc_state[row][col];
-				mul_array_by_matrix_32x32(mc, inv_mix_columns_mixing_bijection,
+				mul_array_by_matrix_32x32(mc,
+						inv_mix_columns_mixing_bijection,
 						mc);
 				for (k = 0; k < 4; ++k) {
-					mul_byte_by_matrix(&mc[k], inv_tbox_mixing_bijections[round
-							+ 1][k][col], mc[k]);
+					mul_byte_by_matrix(&mc[k],
+							inv_tbox_mixing_bijections[round][k][col],
+							mc[k]);
 				}
 				for (new_row = 0; new_row < 4; ++new_row) {
 					strips2[new_row][col][row] = mc[new_row];
@@ -992,7 +1001,8 @@ void test_typeIA_II_combined()
 			uint8_t temp = tbox[round][row][col][state2[row][col]];
 			uint8_t slice[4];
 			calc_mixing_slices(slice, temp, row);
-			mul_array_by_matrix_32x32(slice, mix_columns_mixing_bijection,
+			mul_array_by_matrix_32x32(slice,
+					mix_columns_mixing_bijection,
 					slice);
 			for (k = 0; k < 4; ++k) {
 				strips32[k][col][row] = slice[k];
@@ -1099,7 +1109,8 @@ void test_typeIII_IB_combined()
 			mul_array_by_matrix_32x32(mc, inv_mix_columns_mixing_bijection, mc);
 			for (k = 0; k < 4; ++k) {
 				mul_byte_by_matrix(&mc[k],
-						inv_tbox_mixing_bijections[round + 1][k][col], mc[k]);
+						inv_tbox_mixing_bijections[round][k][col],
+						mc[k]);
 			}
 			for (new_row = 0; new_row < 4; ++new_row) {
 				strips32[new_row][col][row] = mc[new_row];
@@ -1118,7 +1129,8 @@ void test_typeIII_IB_combined()
 			int index = row * 4 + col;
 			uint8_t tbox_val = tbox[NR - 1][row][col][state2[row][col]];
 			mul_byte_by_matrix_128x8(strips128[row][col],
-					encoding_slices[index], tbox_val);
+					encoding_slices[index],
+					tbox_val);
 		}
 	}
 	for (row = 0; row < 4; ++row) {
@@ -1157,8 +1169,7 @@ void test_encryption()
 	typeIV_III_round_t typeIV_IIIs[NR - 1];
 	uint32_t key_schedule[4 * (NR + 1)];
 	uint8_t key[KEY_SIZE];
-	/*  = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, */
-	/* 		0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f }; */
+
 	sboxes_8bit_t typeIA_input_sbox, typeIA_input_sbox_inv;
 	sboxes_128bit_t typeIA_interim_sbox, typeIA_interim_sbox_inv;
 	sboxes_8bit_t typeII_input_sbox[NR], typeII_input_sbox_inv[NR];
@@ -1175,7 +1186,7 @@ void test_encryption()
 	_4bit_strip128_t strips128;
 	int round, row, col, i;
 
-	int tries = 10;
+	int tries = 3;
 	for (; tries != 0; --tries) {
 		randomize_key(key);
 		make_block_invertible_matrix_pair(&mix_columns_mixing_bijection,
@@ -1208,7 +1219,7 @@ void test_encryption()
 		make_typeIV_II(typeIV_IIs, typeII_interim_sbox_inv, typeII_output_sbox,
 				typeII_output_sbox_inv);
 		make_typeIII(typeIIIs, inv_mix_columns_mixing_bijection,
-				inv_tbox_mixing_bijections, typeII_output_sbox_inv,
+				&inv_tbox_mixing_bijections[1], typeII_output_sbox_inv,
 				typeIII_interim_sbox);
 		make_typeIV_III(typeIV_IIIs, typeIII_interim_sbox_inv,
 				&typeII_input_sbox[1], &typeII_input_sbox_inv[1]);
@@ -1221,6 +1232,7 @@ void test_encryption()
 			in[i] = rand();
 		}
 		dump_hex("input: ", in, 16);
+		printf("White-box AES Cipher:\n");
 		do_input(state, in, initial_encoding, typeIA_input_sbox);
 
 		dump_state("State before ", state);
@@ -1242,7 +1254,7 @@ void test_encryption()
 
 		do_output(out, state, final_decoding, typeIB_output_sbox_inv);
 
-		printf("Original AES encryption on same input using same key\n");
+		printf("Original AES Cipher on same input using same key:\n");
 		cipher(in, out2, SBox, key_schedule);
 		dump_hex("WB Output ", out, 16);
 		dump_hex("AES Output ", out2, 16);

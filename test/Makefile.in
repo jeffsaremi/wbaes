@@ -32,7 +32,8 @@ NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
 check_PROGRAMS = test_gf2matrix$(EXEEXT) test_linear_ops$(EXEEXT) \
-	test_nonlinear_ops$(EXEEXT) test_wb_aes$(EXEEXT)
+	test_nonlinear_ops$(EXEEXT) test_aes$(EXEEXT) \
+	test_wb_aes$(EXEEXT) test_wb_aes_inv$(EXEEXT)
 TESTS = $(check_PROGRAMS)
 subdir = test
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
@@ -44,6 +45,10 @@ mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
+am_test_aes_OBJECTS = test_aes-test_aes.$(OBJEXT) \
+	test_aes-test_util.$(OBJEXT)
+test_aes_OBJECTS = $(am_test_aes_OBJECTS)
+test_aes_DEPENDENCIES = $(test_libs)
 am_test_gf2matrix_OBJECTS = test_gf2matrix-test_gf2matrix.$(OBJEXT) \
 	test_gf2matrix-test_util.$(OBJEXT)
 test_gf2matrix_OBJECTS = $(am_test_gf2matrix_OBJECTS)
@@ -62,6 +67,11 @@ am_test_wb_aes_OBJECTS = test_wb_aes-test_wb_aes.$(OBJEXT) \
 	test_wb_aes-test_util.$(OBJEXT)
 test_wb_aes_OBJECTS = $(am_test_wb_aes_OBJECTS)
 test_wb_aes_DEPENDENCIES = $(test_libs)
+am_test_wb_aes_inv_OBJECTS =  \
+	test_wb_aes_inv-test_wb_aes_inv.$(OBJEXT) \
+	test_wb_aes_inv-test_util.$(OBJEXT)
+test_wb_aes_inv_OBJECTS = $(am_test_wb_aes_inv_OBJECTS)
+test_wb_aes_inv_DEPENDENCIES = $(test_libs)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -70,10 +80,12 @@ COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(test_gf2matrix_SOURCES) $(test_linear_ops_SOURCES) \
-	$(test_nonlinear_ops_SOURCES) $(test_wb_aes_SOURCES)
-DIST_SOURCES = $(test_gf2matrix_SOURCES) $(test_linear_ops_SOURCES) \
-	$(test_nonlinear_ops_SOURCES) $(test_wb_aes_SOURCES)
+SOURCES = $(test_aes_SOURCES) $(test_gf2matrix_SOURCES) \
+	$(test_linear_ops_SOURCES) $(test_nonlinear_ops_SOURCES) \
+	$(test_wb_aes_SOURCES) $(test_wb_aes_inv_SOURCES)
+DIST_SOURCES = $(test_aes_SOURCES) $(test_gf2matrix_SOURCES) \
+	$(test_linear_ops_SOURCES) $(test_nonlinear_ops_SOURCES) \
+	$(test_wb_aes_SOURCES) $(test_wb_aes_inv_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 am__tty_colors = \
@@ -167,7 +179,10 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-test_libs = $(top_builddir)/src/libwb_aes.a $(top_builddir)/gen/libwb_aes_gen.a $(top_builddir)/src/libwb_aes.a
+test_libs = $(top_builddir)/src/libwb_aes.a \
+    $(top_builddir)/gen/libwb_aes_gen.a \
+    $(top_builddir)/src/libwb_aes.a
+
 test_includes = -I$(top_srcdir)/gen -I$(top_srcdir)/src
 test_gf2matrix_SOURCES = test_gf2matrix.c test_util.c
 test_gf2matrix_CPPFLAGS = ${test_includes}
@@ -178,9 +193,15 @@ test_linear_ops_LDADD = ${test_libs}
 test_nonlinear_ops_SOURCES = test_nonlinear_ops.c test_util.c
 test_nonlinear_ops_CPPFLAGS = ${test_includes}
 test_nonlinear_ops_LDADD = ${test_libs}
+test_aes_SOURCES = test_aes.c test_util.c
+test_aes_CPPFLAGS = ${test_includes}
+test_aes_LDADD = ${test_libs}
 test_wb_aes_SOURCES = test_wb_aes.c test_util.c
 test_wb_aes_CPPFLAGS = ${test_includes}
 test_wb_aes_LDADD = ${test_libs}
+test_wb_aes_inv_SOURCES = test_wb_aes_inv.c test_util.c
+test_wb_aes_inv_CPPFLAGS = ${test_includes}
+test_wb_aes_inv_LDADD = ${test_libs}
 EXTRA_DIST = test.h test_util.h
 all: all-am
 
@@ -219,6 +240,9 @@ $(am__aclocal_m4_deps):
 
 clean-checkPROGRAMS:
 	-test -z "$(check_PROGRAMS)" || rm -f $(check_PROGRAMS)
+test_aes$(EXEEXT): $(test_aes_OBJECTS) $(test_aes_DEPENDENCIES) 
+	@rm -f test_aes$(EXEEXT)
+	$(LINK) $(test_aes_OBJECTS) $(test_aes_LDADD) $(LIBS)
 test_gf2matrix$(EXEEXT): $(test_gf2matrix_OBJECTS) $(test_gf2matrix_DEPENDENCIES) 
 	@rm -f test_gf2matrix$(EXEEXT)
 	$(LINK) $(test_gf2matrix_OBJECTS) $(test_gf2matrix_LDADD) $(LIBS)
@@ -231,6 +255,9 @@ test_nonlinear_ops$(EXEEXT): $(test_nonlinear_ops_OBJECTS) $(test_nonlinear_ops_
 test_wb_aes$(EXEEXT): $(test_wb_aes_OBJECTS) $(test_wb_aes_DEPENDENCIES) 
 	@rm -f test_wb_aes$(EXEEXT)
 	$(LINK) $(test_wb_aes_OBJECTS) $(test_wb_aes_LDADD) $(LIBS)
+test_wb_aes_inv$(EXEEXT): $(test_wb_aes_inv_OBJECTS) $(test_wb_aes_inv_DEPENDENCIES) 
+	@rm -f test_wb_aes_inv$(EXEEXT)
+	$(LINK) $(test_wb_aes_inv_OBJECTS) $(test_wb_aes_inv_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -238,6 +265,8 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_aes-test_aes.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_aes-test_util.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_gf2matrix-test_gf2matrix.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_gf2matrix-test_util.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_linear_ops-test_linear_ops.Po@am__quote@
@@ -246,6 +275,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_nonlinear_ops-test_util.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_wb_aes-test_util.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_wb_aes-test_wb_aes.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_wb_aes_inv-test_util.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test_wb_aes_inv-test_wb_aes_inv.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -260,6 +291,34 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(COMPILE) -c `$(CYGPATH_W) '$<'`
+
+test_aes-test_aes.o: test_aes.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_aes_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT test_aes-test_aes.o -MD -MP -MF $(DEPDIR)/test_aes-test_aes.Tpo -c -o test_aes-test_aes.o `test -f 'test_aes.c' || echo '$(srcdir)/'`test_aes.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/test_aes-test_aes.Tpo $(DEPDIR)/test_aes-test_aes.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='test_aes.c' object='test_aes-test_aes.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_aes_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o test_aes-test_aes.o `test -f 'test_aes.c' || echo '$(srcdir)/'`test_aes.c
+
+test_aes-test_aes.obj: test_aes.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_aes_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT test_aes-test_aes.obj -MD -MP -MF $(DEPDIR)/test_aes-test_aes.Tpo -c -o test_aes-test_aes.obj `if test -f 'test_aes.c'; then $(CYGPATH_W) 'test_aes.c'; else $(CYGPATH_W) '$(srcdir)/test_aes.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/test_aes-test_aes.Tpo $(DEPDIR)/test_aes-test_aes.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='test_aes.c' object='test_aes-test_aes.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_aes_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o test_aes-test_aes.obj `if test -f 'test_aes.c'; then $(CYGPATH_W) 'test_aes.c'; else $(CYGPATH_W) '$(srcdir)/test_aes.c'; fi`
+
+test_aes-test_util.o: test_util.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_aes_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT test_aes-test_util.o -MD -MP -MF $(DEPDIR)/test_aes-test_util.Tpo -c -o test_aes-test_util.o `test -f 'test_util.c' || echo '$(srcdir)/'`test_util.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/test_aes-test_util.Tpo $(DEPDIR)/test_aes-test_util.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='test_util.c' object='test_aes-test_util.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_aes_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o test_aes-test_util.o `test -f 'test_util.c' || echo '$(srcdir)/'`test_util.c
+
+test_aes-test_util.obj: test_util.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_aes_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT test_aes-test_util.obj -MD -MP -MF $(DEPDIR)/test_aes-test_util.Tpo -c -o test_aes-test_util.obj `if test -f 'test_util.c'; then $(CYGPATH_W) 'test_util.c'; else $(CYGPATH_W) '$(srcdir)/test_util.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/test_aes-test_util.Tpo $(DEPDIR)/test_aes-test_util.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='test_util.c' object='test_aes-test_util.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_aes_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o test_aes-test_util.obj `if test -f 'test_util.c'; then $(CYGPATH_W) 'test_util.c'; else $(CYGPATH_W) '$(srcdir)/test_util.c'; fi`
 
 test_gf2matrix-test_gf2matrix.o: test_gf2matrix.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_gf2matrix_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT test_gf2matrix-test_gf2matrix.o -MD -MP -MF $(DEPDIR)/test_gf2matrix-test_gf2matrix.Tpo -c -o test_gf2matrix-test_gf2matrix.o `test -f 'test_gf2matrix.c' || echo '$(srcdir)/'`test_gf2matrix.c
@@ -372,6 +431,34 @@ test_wb_aes-test_util.obj: test_util.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='test_util.c' object='test_wb_aes-test_util.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_wb_aes_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o test_wb_aes-test_util.obj `if test -f 'test_util.c'; then $(CYGPATH_W) 'test_util.c'; else $(CYGPATH_W) '$(srcdir)/test_util.c'; fi`
+
+test_wb_aes_inv-test_wb_aes_inv.o: test_wb_aes_inv.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_wb_aes_inv_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT test_wb_aes_inv-test_wb_aes_inv.o -MD -MP -MF $(DEPDIR)/test_wb_aes_inv-test_wb_aes_inv.Tpo -c -o test_wb_aes_inv-test_wb_aes_inv.o `test -f 'test_wb_aes_inv.c' || echo '$(srcdir)/'`test_wb_aes_inv.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/test_wb_aes_inv-test_wb_aes_inv.Tpo $(DEPDIR)/test_wb_aes_inv-test_wb_aes_inv.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='test_wb_aes_inv.c' object='test_wb_aes_inv-test_wb_aes_inv.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_wb_aes_inv_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o test_wb_aes_inv-test_wb_aes_inv.o `test -f 'test_wb_aes_inv.c' || echo '$(srcdir)/'`test_wb_aes_inv.c
+
+test_wb_aes_inv-test_wb_aes_inv.obj: test_wb_aes_inv.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_wb_aes_inv_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT test_wb_aes_inv-test_wb_aes_inv.obj -MD -MP -MF $(DEPDIR)/test_wb_aes_inv-test_wb_aes_inv.Tpo -c -o test_wb_aes_inv-test_wb_aes_inv.obj `if test -f 'test_wb_aes_inv.c'; then $(CYGPATH_W) 'test_wb_aes_inv.c'; else $(CYGPATH_W) '$(srcdir)/test_wb_aes_inv.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/test_wb_aes_inv-test_wb_aes_inv.Tpo $(DEPDIR)/test_wb_aes_inv-test_wb_aes_inv.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='test_wb_aes_inv.c' object='test_wb_aes_inv-test_wb_aes_inv.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_wb_aes_inv_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o test_wb_aes_inv-test_wb_aes_inv.obj `if test -f 'test_wb_aes_inv.c'; then $(CYGPATH_W) 'test_wb_aes_inv.c'; else $(CYGPATH_W) '$(srcdir)/test_wb_aes_inv.c'; fi`
+
+test_wb_aes_inv-test_util.o: test_util.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_wb_aes_inv_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT test_wb_aes_inv-test_util.o -MD -MP -MF $(DEPDIR)/test_wb_aes_inv-test_util.Tpo -c -o test_wb_aes_inv-test_util.o `test -f 'test_util.c' || echo '$(srcdir)/'`test_util.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/test_wb_aes_inv-test_util.Tpo $(DEPDIR)/test_wb_aes_inv-test_util.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='test_util.c' object='test_wb_aes_inv-test_util.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_wb_aes_inv_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o test_wb_aes_inv-test_util.o `test -f 'test_util.c' || echo '$(srcdir)/'`test_util.c
+
+test_wb_aes_inv-test_util.obj: test_util.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_wb_aes_inv_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT test_wb_aes_inv-test_util.obj -MD -MP -MF $(DEPDIR)/test_wb_aes_inv-test_util.Tpo -c -o test_wb_aes_inv-test_util.obj `if test -f 'test_util.c'; then $(CYGPATH_W) 'test_util.c'; else $(CYGPATH_W) '$(srcdir)/test_util.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/test_wb_aes_inv-test_util.Tpo $(DEPDIR)/test_wb_aes_inv-test_util.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='test_util.c' object='test_wb_aes_inv-test_util.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(test_wb_aes_inv_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o test_wb_aes_inv-test_util.obj `if test -f 'test_util.c'; then $(CYGPATH_W) 'test_util.c'; else $(CYGPATH_W) '$(srcdir)/test_util.c'; fi`
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
