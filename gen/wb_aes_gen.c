@@ -3,6 +3,7 @@
 #include <assert.h>
 #include "wb_aes_gen.h"
 #include "linear_ops.h"
+#include "nonlinear_ops.h"
 #include "aes.h"
 #include "util.h"
 
@@ -556,8 +557,8 @@ int make_rounds_sbox_pair_32(sboxes_32bit_t encoding_sboxes[],
 			for (col = 0; col < 4 && !rc; ++col) {
 				for (i = 0; i < 8 && !rc; ++i) {
 					rc = make_random_sbox(
-							&(encoding_sboxes[round][row][col][i]),
-							&(decoding_sboxes[round][row][col][i]),
+							encoding_sboxes[round][row][col][i],
+							decoding_sboxes[round][row][col][i],
 							4);
 					assert(rc == 0);
 				}
@@ -577,8 +578,8 @@ int make_rounds_sbox_pair_8(sboxes_8bit_t encoding_sboxes[],
 			for (col = 0; col < 4 && !rc; ++col) {
 				for (i = 0; i < 2 && !rc; ++i) {
 					rc = make_random_sbox(
-							&(encoding_sboxes[round][row][col][i]),
-							&(decoding_sboxes[round][row][col][i]),
+							encoding_sboxes[round][row][col][i],
+							decoding_sboxes[round][row][col][i],
 							4);
 					assert(rc == 0);
 				}
