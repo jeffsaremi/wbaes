@@ -5,15 +5,13 @@
 
 int is_invertible(const gf2matrix *m)
 {
-	int rc = 1;
+	int rc = 0;
 	gf2matrix *inv = invert_matrix(NULL, m);
 	if (inv) {
 		free_matrix(inv);
 		rc = 1;
 	}
-	else {
-		rc = 0;
-	}
+
 	return rc;
 }
 int comp_regions(const gf2matrix *a, int start_row_a, int start_col_a,
@@ -37,5 +35,5 @@ int copy_matrix(gf2matrix *dest, const gf2matrix *src)
 		return -1;
 	if ((get_rows(src) != get_rows(dest)) || (get_cols(src) != get_rows(dest)))
 		return -2;
-	copy_matrix_to_offset(dest, src, 0, 0);
+	return copy_matrix_to_offset(dest, src, 0, 0);
 }

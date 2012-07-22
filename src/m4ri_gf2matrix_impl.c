@@ -43,22 +43,6 @@ void convert_to_identity(gf2matrix *m)
 		return;
 	mzd_set_ui(m, 1);
 }
-gf2matrix *invert_matrix(gf2matrix *dest, const gf2matrix *m)
-{
-	if (!m)
-		return NULL;
-	mzd_t *I = make_identity_matrix(m->nrows);
-	mzd_t *temp = mzd_invert_m4ri((mzd_t*) m, I, 0);
-	if (dest) {
-		mzd_copy(dest, temp);
-		mzd_free(temp);
-	}
-	else {
-		dest = temp;
-	}
-	mzd_free(I);
-	return dest;
-}
 gf2matrix *add_matrices(gf2matrix *C, const gf2matrix *A, const gf2matrix *B)
 {
 	if (!A || !B)
@@ -98,10 +82,6 @@ gf2matrix *extract_region(gf2matrix *dest, const gf2matrix *src, int start_row,
 	return mzd_submatrix(dest, src, start_row, start_col,
 			start_row + row_count, start_col + col_count);
 }
-int scalar2matrix(gf2matrix *m, int scalar, int bitcount)
-{
-	return scalar2matrix_offset(m, scalar, bitcount, 0, 0);
-}
 int scalar2matrix_offset(gf2matrix *m, int scalar, int bitcount, int offset_row,
 		int offset_col)
 {
@@ -122,9 +102,9 @@ int scalar2matrix_offset(gf2matrix *m, int scalar, int bitcount, int offset_row,
 	}
 	return 0;
 }
-int matrix2scalar(int *scalar, const gf2matrix *m, int bitcount)
+int scalar2matrix(gf2matrix *m, int scalar, int bitcount)
 {
-	return matrix2scalar_offset(scalar, m, bitcount, 0, 0);
+    return scalar2matrix_offset(m, scalar, bitcount, 0, 0);
 }
 int matrix2scalar_offset(int *scalar, const gf2matrix *m, int bitcount,
 		int offset_row, int offset_col)
@@ -150,6 +130,10 @@ int matrix2scalar_offset(int *scalar, const gf2matrix *m, int bitcount,
 		}
 	}
 	return 0;
+}
+int matrix2scalar(int *scalar, const gf2matrix *m, int bitcount)
+{
+    return matrix2scalar_offset(scalar, m, bitcount, 0, 0);
 }
 gf2matrix *dup_matrix(const gf2matrix *m)
 {
@@ -195,4 +179,33 @@ int calc_rank(const gf2matrix *m)
 	int r = (int) mzd_echelonize_m4ri(copy, 0, 0);
 	free_matrix(copy);
 	return r;
+}
+gf2matrix *invert_matrix(gf2matrix *dest, const gf2matrix *m)
+{
+    if (!m)
+        return NULL;
+    mzd_t *temp = mzd_inv_m4ri(NULL, (mzd_t*) m, 0);
+    if(!temp) {
+        dest = NULL;
+    }
+    else {
+        mzd_t *I = make_identity_matrix(m->nrows);
+        mzd_t *prod = mul_matrices(NULL, m, temp);
+        if(comp_matrices(prod, I) == 0) {
+            // inversion was successful
+            if (dest) {
+                mzd_copy(dest, temp);
+                mzd_free(temp);
+            }
+            else {
+                dest = temp;
+            }
+        }
+        else {
+            dest = NULL;
+        }
+        mzd_free(prod);
+        mzd_free(I);
+    }
+    return dest;
 }

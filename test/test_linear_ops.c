@@ -76,7 +76,17 @@ static int is_block_identity(const gf2matrix *m)
 	free_matrix(I);
 	return rc;
 }
-
+void test_free_matrices()
+{
+    int i;
+    int n = 3;
+    gf2matrix **m = (gf2matrix **) malloc(n * sizeof(gf2matrix*));
+    for (i = 0; i < n; ++i) {
+        m[i] = new_matrix(3, 3);
+    }
+    free_matrices(m, n);
+    free(m);
+}
 void test_byte_vector_ops()
 {
 	int i, offset;
@@ -307,7 +317,7 @@ void test_sliced_mul_with_inv()
 int main()
 {
 	/* srand(1234); */
-
+    TEST(test_free_matrices);
 	TEST(test_byte_vector_ops);
 	TEST(test_matrix_mul_128x128);
 	TEST(test_matrix_mul_8x128);

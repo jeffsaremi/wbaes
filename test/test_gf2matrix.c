@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "gf2matrix.h"
+#include "util.h"
 #include "test.h"
 
 #ifndef MIN
@@ -14,17 +15,6 @@ void test_matrix_allocation()
 {
 	gf2matrix *m = new_matrix(3, 3);
 	free_matrix(m);
-}
-void test_free_matrices()
-{
-	int i;
-	int n = 3;
-	gf2matrix **m = (gf2matrix **) malloc(n * sizeof(gf2matrix*));
-	for (i = 0; i < n; ++i) {
-		m[i] = new_matrix(3, 3);
-	}
-	free_matrices(m, n);
-	free(m);
 }
 void test_get_rows_cols()
 {
@@ -300,7 +290,6 @@ void test_copy()
 int main()
 {
 	TEST(test_matrix_allocation);
-	TEST(test_free_matrices);
 	TEST(test_get_rows_cols);
 	TEST(test_identity_matrix);
 	TEST(test_convert_to_identity);

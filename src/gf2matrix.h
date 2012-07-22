@@ -78,7 +78,7 @@ void clear_matrix(gf2matrix *m);
  * \brief
  * sets a (row,col) bit to the given value
  */
-void set_bit_in_matrix(gf2matrix *m, int bit, int row, int col);
+void set_bit_at(gf2matrix *m, int bit, int row, int col);
 /**
  * \brief
  * gets a bit locates at (row,col) in matrix m

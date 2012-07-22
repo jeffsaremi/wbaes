@@ -7,7 +7,9 @@
  *
  * \author Jeff Saremi <jeffsaremi@yahoo.com>
  */
+#define rotate_word m4ri_rotate_word
 #include "m4ri/m4ri.h"
+#undef rotate_word
 
 /** make gf2matrix the same as mzd_t in m4ri */
 typedef mzd_t gf2matrix;
