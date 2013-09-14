@@ -18,8 +18,6 @@
 extern uint8_t SBox[256];
 /** The original inverse SBOX of AES */
 extern uint8_t ISBox[256];
-/** The original Round Constant of AES in Key Expansion */
-extern uint32_t Rcon[11];
 /** verbatim from AES standard */
 void copy_word(uint8_t dest[4], uint8_t src[4]);
 /** verbatim from AES standard */

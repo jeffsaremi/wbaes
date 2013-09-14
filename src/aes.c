@@ -41,19 +41,58 @@ uint8_t ISBox[256] =
     0xA0, 0xE0, 0x3B, 0x4D, 0xAE, 0x2A, 0xF5, 0xB0, 0xC8, 0xEB, 0xBB, 0x3C, 0x83, 0x53, 0x99, 0x61,
     0x17, 0x2B, 0x04, 0x7E, 0xBA, 0x77, 0xD6, 0x26, 0xE1, 0x69, 0x14, 0x63, 0x55, 0x21, 0x0C, 0x7D
 };
-uint32_t Rcon[11] = {0x00000000,
+static uint32_t Rcon[11] = {0x00000000,
 	0x00000001, 0x00000002, 0x00000004, 0x00000008,
 	0x00000010, 0x00000020, 0x00000040, 0x00000080,
 	0x0000001B, 0x00000036
 };
 
-uint8_t ModMul2[256];
-uint8_t ModMul3[256];
-uint8_t ModMul9[256];
-uint8_t ModMulB[256];
-uint8_t ModMulD[256];
-uint8_t ModMulE[256];
+static uint8_t ModMul2[256];
+static uint8_t ModMul3[256];
+static uint8_t ModMul9[256];
+static uint8_t ModMulB[256];
+static uint8_t ModMulD[256];
+static uint8_t ModMulE[256];
+static int g_mod_mul = 0;
+static int g_inv_mod_mul = 0;
 
+static void gen_mod_mul()
+{
+	if(!g_mod_mul)
+	{
+		int i;
+	    for(i = 0; i <= 256; ++i)
+	    {
+	        ModMul3[i] = (ModMul2[i] = xtime((uint8_t)i)) ^ (uint8_t)i;
+	    }
+	    /* dump_hex2("ModMul2: ", ModMul2, 256); */
+	    /* dump_hex2("ModMul3: ", ModMul3, 256); */
+	    g_mod_mul = 1;
+	}
+}
+static void gen_inv_mod_mul()
+{
+	if(!g_inv_mod_mul)
+	{
+		int i;
+	    for(i = 0; i <= 256; ++i)
+	    {
+	        uint8_t i1 = (uint8_t)i;
+	        uint8_t i2 = xtime(i1);
+	        uint8_t i4 = xtime(i2);
+	        uint8_t i8 = xtime(i4);
+	        ModMul9[i] = i8 ^ (uint8_t)i;
+	        ModMulB[i] = i8 ^ i2 ^ i1;
+	        ModMulD[i] = i8 ^ i4 ^ i1;
+	        ModMulE[i] = i8 ^ i4 ^ i2;
+	    }
+	/*     dump_hex2("ModMul9: ", ModMul9, 256); */
+	/*     dump_hex2("ModMulB: ", ModMulB, 256); */
+	/*     dump_hex2("ModMulD: ", ModMulD, 256); */
+	/*     dump_hex2("ModMulE: ", ModMulE, 256); */
+	    g_inv_mod_mul = 1;
+	}
+}
 void copy_word(uint8_t dest[4], uint8_t src[4])
 {
     dest[0] = src[0];
@@ -84,6 +123,8 @@ void add_round_key(uint8_t state[4][4], uint32_t key_schedule[4*(NR+1)],
 void mix_columns(uint8_t state[4][4])
 {
 	int col;
+	if(!g_mod_mul)
+		gen_mod_mul();
     for(col = 0; col < 4; ++col)
     {
         uint8_t temp[4];
@@ -100,7 +141,9 @@ void mix_columns(uint8_t state[4][4])
 void mix_columns_inv(uint8_t state[4][4])
 {
 	int col;
-    for(col = 0; col < 4; ++col)
+	if(!g_inv_mod_mul)
+		gen_inv_mod_mul();
+	for(col = 0; col < 4; ++col)
     {
         uint8_t temp[4];
         temp[0] = ModMulE[state[0][col]] ^ ModMulB[state[1][col]] ^ ModMulD[state[2][col]] ^ ModMul9[state[3][col]];
@@ -116,6 +159,8 @@ void mix_columns_inv(uint8_t state[4][4])
 void mix_columns_inv2(uint8_t key[4*4])
 {
 	int i;
+	if(!g_inv_mod_mul)
+		gen_inv_mod_mul();
     for(i = 0; i < 4*4; i+=4)
     {
         uint8_t temp[4];
@@ -296,15 +341,10 @@ void state2output(uint8_t output[16], uint8_t state[4][4])
 void cipher(uint8_t in[4*4], uint8_t out[4*4], const uint8_t sbox[256],
 		uint32_t key_schedule[4*(NR+1)])
 {
-	int i, round;
+	int round;
     uint8_t state[4][4];
     printf("%s\n", __FUNCTION__);
-    for(i = 0; i <= 256; ++i)
-    {
-        ModMul3[i] = (ModMul2[i] = xtime((uint8_t)i)) ^ (uint8_t)i;
-    }
-    /* dump_hex2("ModMul2: ", ModMul2, 256); */
-    /* dump_hex2("ModMul3: ", ModMul3, 256); */
+
 
     dump_hex("Input: ", in, 4*4);
     input2state(state, in);
@@ -343,24 +383,9 @@ void cipher(uint8_t in[4*4], uint8_t out[4*4], const uint8_t sbox[256],
 void decipher(uint8_t in[4*4], uint8_t out[4*4], const uint8_t isbox[256],
 		uint32_t key_schedule[4*(NR+1)])
 {
-	int i, round;
+	int round;
     uint8_t state[4][4];
     printf("%s\n", __FUNCTION__);
-    for(i = 0; i <= 256; ++i)
-    {
-        uint8_t i1 = (uint8_t)i;
-        uint8_t i2 = xtime(i1);
-        uint8_t i4 = xtime(i2);
-        uint8_t i8 = xtime(i4);
-        ModMul9[i] = i8 ^ (uint8_t)i;
-        ModMulB[i] = i8 ^ i2 ^ i1;
-        ModMulD[i] = i8 ^ i4 ^ i1;
-        ModMulE[i] = i8 ^ i4 ^ i2;
-    }
-/*     dump_hex2("ModMul9: ", ModMul9, 256); */
-/*     dump_hex2("ModMulB: ", ModMulB, 256); */
-/*     dump_hex2("ModMulD: ", ModMulD, 256); */
-/*     dump_hex2("ModMulE: ", ModMulE, 256); */
 
     /* dump_hex("Input: ", in, 4*4); */
     input2state(state, in);
@@ -402,24 +427,10 @@ void decipher(uint8_t in[4*4], uint8_t out[4*4], const uint8_t isbox[256],
 void eqv_decipher(uint8_t in[4*4], uint8_t out[4*4], const uint8_t isbox[256],
 		uint32_t key_schedule[4*(NR+1)])
 {
-	int i, round;
+	int round;
     uint8_t state[4][4];
     printf("%s\n", __FUNCTION__);
-    for(i = 0; i <= 256; ++i)
-    {
-        uint8_t i1 = (uint8_t)i;
-        uint8_t i2 = xtime(i1);
-        uint8_t i4 = xtime(i2);
-        uint8_t i8 = xtime(i4);
-        ModMul9[i] = i8 ^ (uint8_t)i;
-        ModMulB[i] = i8 ^ i2 ^ i1;
-        ModMulD[i] = i8 ^ i4 ^ i1;
-        ModMulE[i] = i8 ^ i4 ^ i2;
-    }
-/*     dump_hex2("ModMul9: ", ModMul9, 256); */
-/*     dump_hex2("ModMulB: ", ModMulB, 256); */
-/*     dump_hex2("ModMulD: ", ModMulD, 256); */
-/*     dump_hex2("ModMulE: ", ModMulE, 256); */
+
 
     /* dump_hex("Input: ", in, 4*4); */
     input2state(state, in);

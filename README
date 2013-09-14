@@ -1,5 +1,6 @@
 Building and running wbaes project requires M4RI, linear algebra package over GF(2). 
 This package can be downloaded from http://m4ri.sagemath.org/.
+The current WBAES was tested against version 20110715 of M4RI.
 After you build and install M4RI, you may still need to provide some parameters to 
 "configure" in wbaes project. That depends on how the installation of M4RI was done. 
 Examples of how you might run "configure" are given below:
